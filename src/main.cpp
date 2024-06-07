@@ -9,6 +9,11 @@
 #define SW_PIN   1  // ESP32 pin GPIO1 SW  pin
 #define JOY_ENB  8
 
+#define BT2      6
+#define BT3      43
+#define BT4      7
+#define BT5      44
+
 #define MYPORT_TX 4
 #define MYPORT_RX 5
 
@@ -22,6 +27,10 @@ char msg[50];
 int valueX = 0; // to store the X-axis value
 int valueY = 0; // to store the Y-axis value
 int bValueM = 0; // To store value of the button
+int bValueU = 0; // To store value of the button
+int bValueD = 0; // To store value of the button
+int bValueL = 0; // To store value of the button
+int bValueR = 0; // To store value of the button
 
 ezButton buttonM(SW_PIN);
 
@@ -46,6 +55,10 @@ void setup() {
   pinMode(VRX_PIN, INPUT);
   pinMode(VRY_PIN, INPUT);
   pinMode(SW_PIN, INPUT);
+  pinMode(BT2, INPUT);
+  pinMode(BT3, INPUT);
+  pinMode(BT4, INPUT);
+  pinMode(BT5, INPUT);
   buttonM.setDebounceTime(40); // set debounce time to 50 milliseconds
   digitalWrite(VIB, LOW);
   delay(2000);
@@ -61,6 +74,10 @@ void loop() {
   valueX = analogRead(VRX_PIN);
   valueY = analogRead(VRY_PIN);
   bValueM = buttonM.getState();
+  bValueU = map(analogRead(BT2), 400, 4095, 0, 1);
+  bValueL = digitalRead(BT3);
+  bValueD = map(analogRead(BT4), 400, 4095, 0, 1);
+  bValueR = digitalRead(BT5);
 
   int valueX_M = map(valueX, 0, 4095, 0, 255);
   int valueY_M = map(valueY, 0, 4095, 0, 255);
@@ -96,10 +113,10 @@ void loop() {
           JSONencoder["jx"]  = valueX_M;
           JSONencoder["jy"]  = valueY_M;
           JSONencoder["BT1"] = bValueM;
-          JSONencoder["BT2"] = 0;
-          JSONencoder["BT3"] = 0;
-          JSONencoder["BT4"] = 0;
-          JSONencoder["BT5"] = 0;
+          JSONencoder["BT2"] = bValueU;
+          JSONencoder["BT3"] = bValueD;
+          JSONencoder["BT4"] = bValueL;
+          JSONencoder["BT5"] = bValueR;
           char JSONmessageBuffer[500];
           serializeJson(JSONencoder, JSONmessageBuffer);
           HW_SERIAL.println(JSONmessageBuffer);

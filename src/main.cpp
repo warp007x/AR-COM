@@ -4,18 +4,20 @@
 #include <ArduinoJson.h>
 
 #define VIB      9 // ESP32 pin GPIO9 Vibration Motor
-#define VRX_PIN  2  // ESP32 pin GPIO2 VRX pin
-#define VRY_PIN  3  // ESP32 pin GPIO3 VRY pin
-#define SW_PIN   1  // ESP32 pin GPIO1 SW  pin
-#define JOY_ENB  8
+#define VRX_PIN  8  // ESP32 pin GPIO2 VRX pin
+#define VRY_PIN  7  // ESP32 pin GPIO3 VRY pin
+#define SW_PIN   6  // ESP32 pin GPIO1 SW  pin
 
-#define BT2      6
-#define BT3      43
-#define BT4      7
-#define BT5      44
+#define JOY_ENB  2
+#define BTN_ENB  1
 
-#define MYPORT_TX 4
-#define MYPORT_RX 5
+#define BT2      33
+#define BT3      34
+#define BT4      37
+#define BT5      38
+
+#define MYPORT_TX 15
+#define MYPORT_RX 16
 
 EspSoftwareSerial::UART myPort;
 #define HW_SERIAL Serial
@@ -42,6 +44,8 @@ void setup() {
   HW_SERIAL.begin(115200); // Standard hardware serial port
   pinMode(JOY_ENB, OUTPUT);
   digitalWrite(JOY_ENB, HIGH);
+  pinMode(BTN_ENB, OUTPUT);
+  digitalWrite(BTN_ENB, HIGH);
   delay(1000);
   SW_SERIAL.begin(9600, SWSERIAL_8N1, MYPORT_RX, MYPORT_TX, false);
   if (!SW_SERIAL) { // If the object did not initialize, then its configuration is invalid
@@ -60,9 +64,9 @@ void setup() {
   pinMode(BT4, INPUT);
   pinMode(BT5, INPUT);
   buttonM.setDebounceTime(40); // set debounce time to 50 milliseconds
-  digitalWrite(VIB, LOW);
-  delay(2000);
   digitalWrite(VIB, HIGH);
+  delay(2000);
+  digitalWrite(VIB, LOW);
   HW_SERIAL.println("HELLO");
 
 
@@ -74,9 +78,13 @@ void loop() {
   valueX = analogRead(VRX_PIN);
   valueY = analogRead(VRY_PIN);
   bValueM = buttonM.getState();
-  bValueU = map(analogRead(BT2), 400, 4095, 0, 1);
+  // bValueU = map(analogRead(BT2), 400, 4095, 0, 1);
+  // bValueL = digitalRead(BT3);
+  // bValueD = map(analogRead(BT4), 400, 4095, 0, 1);
+  // bValueR = digitalRead(BT5);
+  bValueU = digitalRead(BT2);
   bValueL = digitalRead(BT3);
-  bValueD = map(analogRead(BT4), 400, 4095, 0, 1);
+  bValueD = digitalRead(BT4);
   bValueR = digitalRead(BT5);
 
   int valueX_M = map(valueX, 0, 4095, 0, 255);
@@ -85,14 +93,14 @@ void loop() {
   if (buttonM.isPressed()) {
     HW_SERIAL.println("The button is pressed");
     // TODO do something here
-    digitalWrite(VIB, LOW);
-    delay(200);
     digitalWrite(VIB, HIGH);
+    delay(200);
+    digitalWrite(VIB, LOW);
   }
 
   if (buttonM.isReleased()) {
     HW_SERIAL.println("The button is released");
-    digitalWrite(VIB, HIGH);
+    digitalWrite(VIB, LOW);
     // TODO do something here
   }
   // print data to Serial Monitor on Arduino IDE
